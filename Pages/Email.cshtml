@@ -1,0 +1,109 @@
+@page
+@model EmailModel
+@{
+    ViewData["Title"] = "ASP.NET Core and Microsoft Graph";
+}
+
+<div>
+    <h1>Email</h1>
+    @if (User.Identity.IsAuthenticated)
+    {
+        if (Model.Messages != null && Model.Messages.Any()) {
+            @* Add foreach here *@
+            @foreach (var message in Model.Messages)
+            {
+                <div class="card" style="width: 50rem;">
+                    <div class="card-body">
+                       @* <h5 class="card-title">
+                            "ID= "+ @message.Id
+                        </h5>*@
+                        <h5 class="card-title">
+                            @message.Subject
+                            @* Add message subject here *@
+
+                        </h5>
+                        <h6 class="card-subtitle mb-2 text-muted">
+                            @message.ReceivedDateTime.GetValueOrDefault().UtcDateTime
+
+                            @* Add message received date/time here *@
+
+                        </h6>
+                        <p class="card-text">
+                            @message.BodyPreview
+
+                            @* Add message body preview here *@
+
+                        </p>
+                        <a class="details" id=@message.Id href="javascript:;">Summarized Text @message.Subject</a>
+                    </div>
+                </div>
+                <br />
+            }
+            @*Add foreach closing bracket here *@
+
+            @if (!String.IsNullOrEmpty(Model.NextLink)) {
+                <a asp-page="/Email" asp-route-nextlink="@Model.NextLink" class="btn btn-primary">Next Page</a>
+            }
+        }
+        else {
+            <div>No Messages found</div>
+        }
+        <div id="partialModal" class="modal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Customer Details Form</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <a class="btn btn-primary btn-large" asp-area="MicrosoftIdentity" asp-controller="Account" asp-action="SignIn">Click here to sign in</a>
+    }
+
+    <br /><br />
+    Learn how to build this page by going through the <strong><a href="https://docs.microsoft.com/learn/paths/m365-msgraph-dotnetcore-scenarios/?WT.mc_id=m365-30352-cxa" target="_blank">Explore Microsoft Graph scenarios for ASP.NET Core development</a></strong> learning path on Microsoft Learn.
+
+</div>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous" />
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script type="text/javascript">
+    $(function () {
+        $(".details").click(function () {
+            //var customerId = $(this).closest("tr").find("td").eq(0).html();
+            //var customerId = "AAMkADZkMzY5ZWVlLTFkNzEtNGMwYi05NDQ3LWVjNjJkNjIzNmFiNQBGAAAAAACdscMaReZSQ7oF3KPwwSZxBwDwHLYZ0j_qTreja8fBp_umAAAAAAEMAADwHLYZ0j_qTreja8fBp_umAAIOVmgvAAA=";
+            var emailId = this.id;
+            console.log(emailId);
+            $.ajax({
+                type: "POST",
+                url: "/Email?handler=OnPostGetDetails",
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("XSRF-TOKEN",
+                        $('input:hidden[name="__RequestVerificationToken"]').val());
+                },
+                data: { "emailId": emailId },
+                success: function (response) {
+                    $("#partialModal").find(".modal-body").html(response);
+                    $("#partialModal").modal('show');
+                },
+                failure: function (response) {
+                    alert(response.responseText);
+                },
+                error: function (response) {
+                    alert(response.responseText);
+                }
+            });
+        });
+    });
+</script>
