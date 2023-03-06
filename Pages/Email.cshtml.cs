@@ -36,8 +36,8 @@ namespace DotNetCoreRazor_MSGraph.Pages
         public async Task OnGetAsync()
         {
             Messages = await _graphEmailClient.GetUserMessages();
-            string MessageId = "AAMkADZkMzY5ZWVlLTFkNzEtNGMwYi05NDQ3LWVjNjJkNjIzNmFiNQBGAAAAAACdscMaReZSQ7oF3KPwwSZxBwDwHLYZ0j_qTreja8fBp_umAAAAAAEPAADwHLYZ0j_qTreja8fBp_umAAIasSz0AAA=";
-            var selectedUserMessage = await _graphEmailClient.GetUserMessageDetails(MessageId);
+            //string MessageId = "AAMkADZkMzY5ZWVlLTFkNzEtNGMwYi05NDQ3LWVjNjJkNjIzNmFiNQBGAAAAAACdscMaReZSQ7oF3KPwwSZxBwDwHLYZ0j_qTreja8fBp_umAAAAAAEPAADwHLYZ0j_qTreja8fBp_umAAIasSz0AAA=";
+            //var selectedUserMessage = await _graphEmailClient.GetUserMessageDetails(MessageId);
             string emailBody = @"The extractive summarization feature uses natural language processing techniques to locate key sentences in an unstructured text document. 
                     These sentences collectively convey the main idea of the document. This feature is provided as an API for developers. 
                     They can use it to build intelligent solutions based on the relevant information extracted to support various use cases. 
@@ -49,6 +49,35 @@ namespace DotNetCoreRazor_MSGraph.Pages
            
             //var client = new TextAnalyticsClient(endpoint, credentials);
             //AnalyzeActionsOperation = await CognitiveServiceSummarization.TextSummarizationExample(client);
+        }
+        public async Task<IActionResult> OnGetAsyncUpdateSearchResults(string selectedMessageId)
+        {
+            //int[] types = selectedTypes.Split(",").Select(x => int.Parse(x)).ToArray();
+
+            //var inventory = await _itemService.GetFiltered(types, null, null, null, null, null, null, startDate, endDate.ToUniversalTime(), null, null, null, null, null, null, null);
+
+            //if (inventory != null)
+            //{
+            //    SearchResultsGridPartialModel = new SearchResultsGridPartialModel();
+            //    SearchResultsGridPartialModel.TotalCount = inventory.TotalCount;
+            //    SearchResultsGridPartialModel.TotalPages = inventory.TotalPages;
+            //    SearchResultsGridPartialModel.PageNumber = inventory.PageNumber;
+            //    SearchResultsGridPartialModel.Items = inventory.Items;
+            //}
+            //string MessageId = "AAMkADZkMzY5ZWVlLTFkNzEtNGMwYi05NDQ3LWVjNjJkNjIzNmFiNQBGAAAAAACdscMaReZSQ7oF3KPwwSZxBwDwHLYZ0j_qTreja8fBp_umAAAAAAEPAADwHLYZ0j_qTreja8fBp_umAAIasSz0AAA=";
+            var selectedUserMessage = await _graphEmailClient.GetUserMessageDetails(selectedMessageId);
+            MessageViewModel message = new MessageViewModel();
+            message.BodyPreview = selectedUserMessage;
+            var myViewData = new ViewDataDictionary(new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(), new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary()) { { "SearchResultsGridPartialModel", message.BodyPreview } };
+            myViewData.Model = message;
+
+            PartialViewResult result = new PartialViewResult()
+            {
+                ViewName = "SummarizedText",
+                ViewData = myViewData,
+            };
+
+            return result;
         }
         public IActionResult ShowPartailView()
         {

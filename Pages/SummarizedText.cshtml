@@ -7,15 +7,34 @@
 @{
     ViewData["Title"] = "ASP.NET Core and Microsoft Graph";
 }
+<h1>@Model.BodyPreview</h1>
 
+<div id="partialModal" class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Customer Details Form</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                @Model.BodyPreview
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-    <div class="card" style="width: 50rem;">
-        <div class="card-body">
+@*    <div class="card" style="width: 50rem;">
+        <div class="card-body">*@
             @* <h5 class="card-title">
         "ID= "+ @message.Id
         </h5>*@
-            <h5 class="card-title">
-            @Model.BodyPreview
+@*            <h5 class="card-title">
+            @Model.BodyPreview*@
                 @* Add message subject here *@
 
             </h5>
@@ -32,6 +51,6 @@
 @*
             </p>
             <a class="details" id=@message.Id href="javascript:;">Summarized Text @message.Subject</a>*@
-        </div>
-    </div>
+       @* </div>
+    </div>*@
     <br />

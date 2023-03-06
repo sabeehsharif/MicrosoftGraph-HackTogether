@@ -48,7 +48,10 @@
 
                         </p>
                         @*<a class="details" id=@message.Id href="javascript:;">Summarized Text @message.Subject</a>*@
-                        <input type="button" class=@message.Id value="Click" id="btnClick" />
+                        @*<input type="button" class=@message.Id value="Click" id="btnClick" />*@
+                        @*<input type="button" class="details" value="Click" id=@message.Id />*@
+                        <a class="details" id=@message.Id href="javascript:;">Summarized Text @message.Subject</a>
+
                     </div>
                 </div>
                 <br />
@@ -66,7 +69,7 @@
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Customer Details Form</h5>
+                        <h5 class="modal-title">Summarized Email Body</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -123,15 +126,67 @@
         });
     });
 </script>*@
-
 <script type="text/javascript">
+
+    //var jsonData = { "selectedMessageId": "AAMkADZkMzY5ZWVlLTFkNzEtNGMwYi05NDQ3LWVjNjJkNjIzNmFiNQBGAAAAAACdscMaReZSQ7oF3KPwwSZxBwDwHLYZ0j_qTreja8fBp_umAAAAAAEPAADwHLYZ0j_qTreja8fBp_umAAIasSz0AAA=" };
+
+    //$.ajax({
+    //    type: 'GET',
+    //    url: "Email/?handler=AsyncUpdateSearchResults",
+    //    beforeSend: function (xhr) {
+    //        xhr.setRequestHeader("XSRF-TOKEN", $('input:hidden[name="__RequestVerificationToken"]').val());
+    //    },
+    //    contentType: 'application/json; charset=utf-8"',
+    //    data: jsonData,
+    //    success: function (result) {
+    //        alert("result success");
+    //        $(".modal-body").html(result);
+    //    },
+    //    error: function (error) {
+    //        alert(error);
+    //        console.log(error);
+    //    }
+    //});
     $(function () {
-        $('#btnClick').click(function (data) {
-            $.post("@Url.Action("ShowPartailView", "Email")", function (data) {
-                if (data) {
-                    $('.modal-body').append(data);
+        $('.details').click(function (data) {
+            //alert("btnclicked");
+            var emailId = this.id;
+            var jsonData = { "selectedMessageId": emailId };
+
+            console.log(emailId);
+            $.ajax({
+                type: 'GET',
+                url: "Email/?handler=AsyncUpdateSearchResults",
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("XSRF-TOKEN", $('input:hidden[name="__RequestVerificationToken"]').val());
+                },
+                contentType: 'application/json; charset=utf-8"',
+                data: jsonData,
+                success: function (result) {
+                    //alert("result success");
+                    //$(".modal-body").html(result);
+                    $("#partialModal").find(".modal-body").html(result);
+                    $("#partialModal").modal('show');
+                },
+                error: function (error) {
+                    alert(error);
+                    console.log(error);
                 }
             });
         });
     });
 </script>
+@*<script type="text/javascript">
+    $(function () {
+        $('#btnClick').click(function (data) {
+            alert("btnclicked");
+            $.post("@Url.Action("ShowPartailView", "Email")", function (data) {
+                if (data) {
+                    alert("in data");
+                    console.log(data);
+                    $('.modal-body').append(data);
+                }
+            });
+        });
+    });
+</script>*@

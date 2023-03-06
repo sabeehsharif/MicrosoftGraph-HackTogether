@@ -27,7 +27,9 @@ namespace DotNetCoreRazor_MSGraph.Graph
         {
             try
             {
-                var emails = await _graphServiceClient.Me.Messages
+                //var test = _graphServiceClient.Me.MailFolders.Inbox.Messages;
+                //var emails = await _graphServiceClient.Me.Messages
+                var emails = await _graphServiceClient.Me.MailFolders.Inbox.Messages
             .Request()
             .Select(msg => new
             {
