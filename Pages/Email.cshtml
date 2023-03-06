@@ -17,6 +17,19 @@
                        @* <h5 class="card-title">
                             "ID= "+ @message.Id
                         </h5>*@
+                      @*  <div>
+                            @Html.Partial("_MyPartialView", @message.BodyPreview )
+                            @{
+                                Html.RenderPartial("_MyPartialView", @message.BodyPreview);
+                            }
+                        </div>*@
+                @*        @{
+                            //await Html.RenderPartialAsync("Pages/SummarizedTextResult", model: Model.Messages);
+                            await Html.RenderPartialAsync("Pages/SummarizedTextResult", message.BodyPreview);
+
+                        }*@
+
+
                         <h5 class="card-title">
                             @message.Subject
                             @* Add message subject here *@
@@ -34,7 +47,8 @@
                             @* Add message body preview here *@
 
                         </p>
-                        <a class="details" id=@message.Id href="javascript:;">Summarized Text @message.Subject</a>
+                        @*<a class="details" id=@message.Id href="javascript:;">Summarized Text @message.Subject</a>*@
+                        <input type="button" class=@message.Id value="Click" id="btnClick" />
                     </div>
                 </div>
                 <br />
@@ -65,6 +79,8 @@
                 </div>
             </div>
         </div>
+        <div id="divTest">
+        </div>
     }
     else
     {
@@ -78,7 +94,7 @@
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous" />
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-<script type="text/javascript">
+@*<script type="text/javascript">
     $(function () {
         $(".details").click(function () {
             //var customerId = $(this).closest("tr").find("td").eq(0).html();
@@ -102,6 +118,18 @@
                 },
                 error: function (response) {
                     alert(response.responseText);
+                }
+            });
+        });
+    });
+</script>*@
+
+<script type="text/javascript">
+    $(function () {
+        $('#btnClick').click(function (data) {
+            $.post("@Url.Action("ShowPartailView", "Email")", function (data) {
+                if (data) {
+                    $('.modal-body').append(data);
                 }
             });
         });

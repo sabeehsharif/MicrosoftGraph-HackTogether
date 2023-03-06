@@ -3,7 +3,7 @@
 *@
 @{
 }
-@model string
+@model MessageViewModel
 @{
     ViewData["Title"] = "ASP.NET Core and Microsoft Graph";
 }
@@ -15,7 +15,7 @@
         "ID= "+ @message.Id
         </h5>*@
             <h5 class="card-title">
-            model
+            @Model.BodyPreview
                 @* Add message subject here *@
 
             </h5>

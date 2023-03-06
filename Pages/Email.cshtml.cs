@@ -50,7 +50,12 @@ namespace DotNetCoreRazor_MSGraph.Pages
             //var client = new TextAnalyticsClient(endpoint, credentials);
             //AnalyzeActionsOperation = await CognitiveServiceSummarization.TextSummarizationExample(client);
         }
-
+        public IActionResult ShowPartailView()
+        {
+            MessageViewModel message = new MessageViewModel();
+            message.BodyPreview = "test sfs";
+            return Partial("~/Pages/SummarizedText.cshtml", message);
+        }
         public PartialViewResult OnPostGetDetails(string emailId)
         {
             string emailId1 = emailId;
@@ -71,6 +76,10 @@ namespace DotNetCoreRazor_MSGraph.Pages
 
             };
         }
+    }
+    class MessageViewModel
+    {
+        public string BodyPreview { get; set; }
     }
 }
 
