@@ -41,12 +41,12 @@ namespace DotNetCoreRazor_MSGraph.Pages
             Messages = await _graphEmailClient.GetUserMessages();
             //string MessageId = "AAMkADZkMzY5ZWVlLTFkNzEtNGMwYi05NDQ3LWVjNjJkNjIzNmFiNQBGAAAAAACdscMaReZSQ7oF3KPwwSZxBwDwHLYZ0j_qTreja8fBp_umAAAAAAEPAADwHLYZ0j_qTreja8fBp_umAAIasSz0AAA=";
             //var selectedUserMessage = await _graphEmailClient.GetUserMessageDetails(MessageId);
-            string emailBody = @"The extractive summarization feature uses natural language processing techniques to locate key sentences in an unstructured text document. 
-                    These sentences collectively convey the main idea of the document. This feature is provided as an API for developers. 
-                    They can use it to build intelligent solutions based on the relevant information extracted to support various use cases. 
-                    In the public preview, extractive summarization supports several languages. It is based on pretrained multilingual transformer models, part of our quest for holistic representations. 
-                    It draws its strength from transfer learning across monolingual and harness the shared nature of languages to produce models of improved quality and efficiency.";
-            var SummarizedTextResult = await CognitiveServiceSummarization.GenerateSummarizedText(emailBody);
+            //string emailBody = @"The extractive summarization feature uses natural language processing techniques to locate key sentences in an unstructured text document. 
+            //        These sentences collectively convey the main idea of the document. This feature is provided as an API for developers. 
+            //        They can use it to build intelligent solutions based on the relevant information extracted to support various use cases. 
+            //        In the public preview, extractive summarization supports several languages. It is based on pretrained multilingual transformer models, part of our quest for holistic representations. 
+            //        It draws its strength from transfer learning across monolingual and harness the shared nature of languages to produce models of improved quality and efficiency.";
+            //var SummarizedTextResult = await CognitiveServiceSummarization.GenerateSummarizedText(emailBody);
             //SummarizedTextResult = await CognitiveServiceSummarization.GenerateSummarizedText(emailBody);
 
            
@@ -70,8 +70,11 @@ namespace DotNetCoreRazor_MSGraph.Pages
             //string MessageId = "AAMkADZkMzY5ZWVlLTFkNzEtNGMwYi05NDQ3LWVjNjJkNjIzNmFiNQBGAAAAAACdscMaReZSQ7oF3KPwwSZxBwDwHLYZ0j_qTreja8fBp_umAAAAAAEPAADwHLYZ0j_qTreja8fBp_umAAIasSz0AAA=";
             var selectedUserMessage = await _graphEmailClient.GetUserMessageDetails(selectedMessageId);
             MessageViewModel message = new MessageViewModel();
-            message.BodyPreview = selectedUserMessage;
-            var myViewData = new ViewDataDictionary(new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(), new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary()) { { "SearchResultsGridPartialModel", message.BodyPreview } };
+            //message.BodyPreview = selectedUserMessage;
+             var SummarizedTextResult = await CognitiveServiceSummarization.GenerateSummarizedText(selectedUserMessage);
+            message.Body = SummarizedTextResult.ToString();
+
+            var myViewData = new ViewDataDictionary(new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(), new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary()) { { "SearchResultsGridPartialModel", message.Body } };
             myViewData.Model = message;
 
             PartialViewResult result = new PartialViewResult()
@@ -86,7 +89,7 @@ namespace DotNetCoreRazor_MSGraph.Pages
         {
             var selectedUserMessage = await _graphEmailClient.GetUserMessageDetails(selectedMessageId);
             MessageViewModel message = new MessageViewModel();
-            message.BodyPreview = selectedUserMessage;
+            message.Body = selectedUserMessage;
             var channelsList = await _graphTeamsClient.GetTeamsChannels(TeamsId);
             message.selectedChannel = channelsList.FirstOrDefault().Id;
 
@@ -121,7 +124,7 @@ namespace DotNetCoreRazor_MSGraph.Pages
         public IActionResult ShowPartailView()
         {
             MessageViewModel message = new MessageViewModel();
-            message.BodyPreview = "test sfs";
+            message.Body = "test sfs";
             return Partial("~/Pages/SummarizedText.cshtml", message);
         }
         public PartialViewResult OnPostGetDetails(string emailId)
@@ -147,7 +150,7 @@ namespace DotNetCoreRazor_MSGraph.Pages
     }
     class MessageViewModel
     {
-        public string BodyPreview { get; set; }
+        public string Body { get; set; }
         public Dictionary<string, string> channelsList = new Dictionary<string, string>();
         public string selectedChannel { get; set; }
     }

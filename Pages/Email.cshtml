@@ -44,8 +44,8 @@
 
                         </h6>
                         <p class="card-text">
-                            @message.BodyPreview
-
+                            @*@message.Body.Content*@
+                            @Html.Raw(@message.Body.Content)
                             @* Add message body preview here *@
 
                         </p>
