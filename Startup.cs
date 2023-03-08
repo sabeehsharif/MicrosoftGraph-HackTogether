@@ -16,6 +16,7 @@ using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using Azure;
 using DotNetCoreRazor_MSGraph.Graph;
+using DotNetCoreRazor.Graph;
 
 namespace DotNetCoreRazor_MSGraph
 {
@@ -70,6 +71,8 @@ namespace DotNetCoreRazor_MSGraph
             services.AddScoped<GraphEmailClient>();
             services.AddScoped<GraphCalendarClient>();
             services.AddScoped<GraphFilesClient>();
+            services.AddScoped<GraphTeamsClient>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

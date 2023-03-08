@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Azure;
 using Azure.AI.TextAnalytics;
+using DotNetCoreRazor.Graph;
 using DotNetCoreRazor_MSGraph.CognitiveService;
 using DotNetCoreRazor_MSGraph.Graph;
 using Microsoft.AspNetCore.Authorization;
@@ -23,14 +24,16 @@ namespace DotNetCoreRazor_MSGraph.Pages
         private static readonly AzureKeyCredential credentials = new AzureKeyCredential("01e7845c945242bbbd22033142476394");
         private static readonly Uri endpoint = new Uri("https://summarizeparagraphs.cognitiveservices.azure.com/ ");
         private readonly GraphEmailClient _graphEmailClient;
-        
+        private readonly GraphTeamsClient _graphTeamsClient;
+
         [BindProperty(SupportsGet = true)]
         public string NextLink { get; set; }
         public IEnumerable<Message> Messages  { get; private set; }
         public List<string> SummarizedTextResult;
-        public EmailModel(GraphEmailClient graphEmailClient)
+        public EmailModel(GraphEmailClient graphEmailClient, GraphTeamsClient graphTeamsClient)
         {
             _graphEmailClient = graphEmailClient;
+            _graphTeamsClient = graphTeamsClient;
         }
 
         public async Task OnGetAsync()
@@ -79,6 +82,42 @@ namespace DotNetCoreRazor_MSGraph.Pages
 
             return result;
         }
+        public async Task<IActionResult> OnGetAsyncGetTeamsChannel(string selectedMessageId, string TeamsId)
+        {
+            var selectedUserMessage = await _graphEmailClient.GetUserMessageDetails(selectedMessageId);
+            MessageViewModel message = new MessageViewModel();
+            message.BodyPreview = selectedUserMessage;
+            var channelsList = await _graphTeamsClient.GetTeamsChannels(TeamsId);
+            message.selectedChannel = channelsList.FirstOrDefault().Id;
+
+            Dictionary<string, string> teamsChannelsList = new Dictionary<string, string>();
+            foreach (var item in channelsList)
+            {
+                teamsChannelsList.Add(item.DisplayName, item.Id);
+            }
+            //{
+            //    { "item 1", "Item 1" },
+            //    { "item 2", "Item 2" },
+            //    { "item 3", "Item 3" },
+            //    { "item 4", "Item 4" }
+            //};
+            message.channelsList = teamsChannelsList;
+
+            var myViewData = new ViewDataDictionary(new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(), new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary()) { { "SearchResultsGridPartialModel", message } };
+            myViewData.Model = message;
+
+            PartialViewResult result = new PartialViewResult()
+            {
+                ViewName = "SummarizedText",
+                ViewData = myViewData,
+            };
+
+            return result;
+        }
+        public void GetTeamsChannels()
+        {
+
+        }
         public IActionResult ShowPartailView()
         {
             MessageViewModel message = new MessageViewModel();
@@ -109,6 +148,8 @@ namespace DotNetCoreRazor_MSGraph.Pages
     class MessageViewModel
     {
         public string BodyPreview { get; set; }
+        public Dictionary<string, string> channelsList = new Dictionary<string, string>();
+        public string selectedChannel { get; set; }
     }
 }
 

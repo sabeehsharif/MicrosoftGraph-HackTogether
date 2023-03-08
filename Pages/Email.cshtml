@@ -6,6 +6,8 @@
 
 <div>
     <h1>Email</h1>
+    <label id="lblTeamsId">Enter Teams ID</label>
+    <input type="text" style="width: 45%;" placeholder="Id of your teams be like f0c093cb-e5c5-4532-8313-de12677105df" id="teamsId" />
     @if (User.Identity.IsAuthenticated)
     {
         if (Model.Messages != null && Model.Messages.Any()) {
@@ -65,7 +67,7 @@
         else {
             <div>No Messages found</div>
         }
-        <div id="partialModal" class="modal" tabindex="-1" role="dialog">
+        @*<div id="partialModal" class="modal" tabindex="-1" role="dialog">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -81,8 +83,9 @@
                     </div>
                 </div>
             </div>
-        </div>
-        <div id="divTest">
+        </div>*@
+        <div id="partialModal" class="modal" tabindex="-1" role="dialog">
+            
         </div>
     }
     else
@@ -149,27 +152,32 @@
     //});
     $(function () {
         $('.details').click(function (data) {
-            //alert("btnclicked");
+//alert("btnclicked");
+            var teamsId = $("#teamsId").val();
             var emailId = this.id;
-            var jsonData = { "selectedMessageId": emailId };
+            var jsonData = { "selectedMessageId": emailId, "TeamsId": teamsId };
 
             console.log(emailId);
             $.ajax({
                 type: 'GET',
-                url: "Email/?handler=AsyncUpdateSearchResults",
+                url: "Email/?handler=AsyncGetTeamsChannel",
                 beforeSend: function (xhr) {
                     xhr.setRequestHeader("XSRF-TOKEN", $('input:hidden[name="__RequestVerificationToken"]').val());
                 },
                 contentType: 'application/json; charset=utf-8"',
                 data: jsonData,
                 success: function (result) {
+                    console.log(result);
+                    debugger;
                     //alert("result success");
                     //$(".modal-body").html(result);
-                    $("#partialModal").find(".modal-body").html(result);
+                    //$("#partialModal").find(".modal-body").html(result);
+                    //$("#partialModal").modal('show');
+                    $("#partialModal").html(result);
                     $("#partialModal").modal('show');
                 },
                 error: function (error) {
-                    alert(error);
+                    alert("Something went wrong. "+error);
                     console.log(error);
                 }
             });
