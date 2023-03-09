@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -21,14 +22,12 @@ namespace DotNetCoreRazor_MSGraph.Pages
     [AuthorizeForScopes(ScopeKeySection = "DownstreamApi:Scopes")]
     public class EmailModel : PageModel
     {
-        private static readonly AzureKeyCredential credentials = new AzureKeyCredential("01e7845c945242bbbd22033142476394");
-        private static readonly Uri endpoint = new Uri("https://summarizeparagraphs.cognitiveservices.azure.com/ ");
         private readonly GraphEmailClient _graphEmailClient;
         private readonly GraphTeamsClient _graphTeamsClient;
 
         [BindProperty(SupportsGet = true)]
         public string NextLink { get; set; }
-        public IEnumerable<Message> Messages  { get; private set; }
+        public IEnumerable<Message> Messages { get; private set; }
         public List<string> SummarizedTextResult;
         public EmailModel(GraphEmailClient graphEmailClient, GraphTeamsClient graphTeamsClient)
         {
@@ -49,47 +48,57 @@ namespace DotNetCoreRazor_MSGraph.Pages
             //var SummarizedTextResult = await CognitiveServiceSummarization.GenerateSummarizedText(emailBody);
             //SummarizedTextResult = await CognitiveServiceSummarization.GenerateSummarizedText(emailBody);
 
-           
+
             //var client = new TextAnalyticsClient(endpoint, credentials);
             //AnalyzeActionsOperation = await CognitiveServiceSummarization.TextSummarizationExample(client);
         }
-        public async Task<IActionResult> OnGetAsyncUpdateSearchResults(string selectedMessageId)
-        {
-            //int[] types = selectedTypes.Split(",").Select(x => int.Parse(x)).ToArray();
+        //public async Task<IActionResult> OnGetAsyncUpdateSearchResults(string selectedMessageId)
+        //{
+        //    //int[] types = selectedTypes.Split(",").Select(x => int.Parse(x)).ToArray();
 
-            //var inventory = await _itemService.GetFiltered(types, null, null, null, null, null, null, startDate, endDate.ToUniversalTime(), null, null, null, null, null, null, null);
+        //    //var inventory = await _itemService.GetFiltered(types, null, null, null, null, null, null, startDate, endDate.ToUniversalTime(), null, null, null, null, null, null, null);
 
-            //if (inventory != null)
-            //{
-            //    SearchResultsGridPartialModel = new SearchResultsGridPartialModel();
-            //    SearchResultsGridPartialModel.TotalCount = inventory.TotalCount;
-            //    SearchResultsGridPartialModel.TotalPages = inventory.TotalPages;
-            //    SearchResultsGridPartialModel.PageNumber = inventory.PageNumber;
-            //    SearchResultsGridPartialModel.Items = inventory.Items;
-            //}
-            //string MessageId = "AAMkADZkMzY5ZWVlLTFkNzEtNGMwYi05NDQ3LWVjNjJkNjIzNmFiNQBGAAAAAACdscMaReZSQ7oF3KPwwSZxBwDwHLYZ0j_qTreja8fBp_umAAAAAAEPAADwHLYZ0j_qTreja8fBp_umAAIasSz0AAA=";
-            var selectedUserMessage = await _graphEmailClient.GetUserMessageDetails(selectedMessageId);
-            MessageViewModel message = new MessageViewModel();
-            //message.BodyPreview = selectedUserMessage;
-             var SummarizedTextResult = await CognitiveServiceSummarization.GenerateSummarizedText(selectedUserMessage);
-            message.Body = SummarizedTextResult.ToString();
+        //    //if (inventory != null)
+        //    //{
+        //    //    SearchResultsGridPartialModel = new SearchResultsGridPartialModel();
+        //    //    SearchResultsGridPartialModel.TotalCount = inventory.TotalCount;
+        //    //    SearchResultsGridPartialModel.TotalPages = inventory.TotalPages;
+        //    //    SearchResultsGridPartialModel.PageNumber = inventory.PageNumber;
+        //    //    SearchResultsGridPartialModel.Items = inventory.Items;
+        //    //}
+        //    //string MessageId = "AAMkADZkMzY5ZWVlLTFkNzEtNGMwYi05NDQ3LWVjNjJkNjIzNmFiNQBGAAAAAACdscMaReZSQ7oF3KPwwSZxBwDwHLYZ0j_qTreja8fBp_umAAAAAAEPAADwHLYZ0j_qTreja8fBp_umAAIasSz0AAA=";
+        //    var selectedUserMessage = await _graphEmailClient.GetUserMessageDetails(selectedMessageId);
+        //    MessageViewModel message = new MessageViewModel();
+        //    //message.BodyPreview = selectedUserMessage;
+        //    // var SummarizedTextResult = await CognitiveServiceSummarization.GenerateSummarizedText(selectedUserMessage);
+        //    //message.Body = SummarizedTextResult.ToString();
+        //    string summarizedEmail = await SummarizedEmail(selectedUserMessage);
+        //    message.Body = summarizedEmail;
+        //    var myViewData = new ViewDataDictionary(new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(), new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary()) { { "SearchResultsGridPartialModel", message.Body } };
+        //    myViewData.Model = message;
 
-            var myViewData = new ViewDataDictionary(new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(), new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary()) { { "SearchResultsGridPartialModel", message.Body } };
-            myViewData.Model = message;
+        //    PartialViewResult result = new PartialViewResult()
+        //    {
+        //        ViewName = "SummarizedText",
+        //        ViewData = myViewData,
+        //    };
 
-            PartialViewResult result = new PartialViewResult()
-            {
-                ViewName = "SummarizedText",
-                ViewData = myViewData,
-            };
-
-            return result;
-        }
+        //    return result;
+        //}
         public async Task<IActionResult> OnGetAsyncGetTeamsChannel(string selectedMessageId, string TeamsId)
         {
             var selectedUserMessage = await _graphEmailClient.GetUserMessageDetails(selectedMessageId);
             MessageViewModel message = new MessageViewModel();
-            message.Body = selectedUserMessage;
+            message.Body = null;
+            //message.Body = selectedUserMessage;
+            var summarizedEmailPoints = await SummarizedEmail(selectedUserMessage);
+            //List<string> summarizedEmail = new List<string>();
+            //foreach (var item in summarizedEmailPoints)
+            //{
+            //    summarizedEmail.Add(item.ToString());
+            //}
+            message.Body = summarizedEmailPoints;
+
             var channelsList = await _graphTeamsClient.GetTeamsChannels(TeamsId);
             message.selectedChannel = channelsList.FirstOrDefault().Id;
 
@@ -98,12 +107,6 @@ namespace DotNetCoreRazor_MSGraph.Pages
             {
                 teamsChannelsList.Add(item.DisplayName, item.Id);
             }
-            //{
-            //    { "item 1", "Item 1" },
-            //    { "item 2", "Item 2" },
-            //    { "item 3", "Item 3" },
-            //    { "item 4", "Item 4" }
-            //};
             message.channelsList = teamsChannelsList;
 
             var myViewData = new ViewDataDictionary(new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(), new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary()) { { "SearchResultsGridPartialModel", message } };
@@ -117,9 +120,10 @@ namespace DotNetCoreRazor_MSGraph.Pages
 
             return result;
         }
-        public void GetTeamsChannels()
+        public async Task<IEnumerable> SummarizedEmail(string selectedUserMessage)
         {
-
+            var SummarizedTextResult = await CognitiveServiceSummarization.GenerateSummarizedText(selectedUserMessage);
+            return SummarizedTextResult;
         }
         public IActionResult ShowPartailView()
         {
@@ -150,7 +154,8 @@ namespace DotNetCoreRazor_MSGraph.Pages
     }
     class MessageViewModel
     {
-        public string Body { get; set; }
+        //public string Body { get; set; }
+        public IEnumerable Body { get; set; }
         public Dictionary<string, string> channelsList = new Dictionary<string, string>();
         public string selectedChannel { get; set; }
     }
