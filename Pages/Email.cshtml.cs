@@ -101,6 +101,7 @@ namespace DotNetCoreRazor_MSGraph.Pages
 
             var channelsList = await _graphTeamsClient.GetTeamsChannels(TeamsId);
             message.selectedChannel = channelsList.FirstOrDefault().Id;
+            //var responsePostedMessage = await PostEmailToChannel(TeamsId , channelsList.FirstOrDefault().Id, summarizedEmailPoints);
 
             Dictionary<string, string> teamsChannelsList = new Dictionary<string, string>();
             foreach (var item in channelsList)
@@ -124,6 +125,18 @@ namespace DotNetCoreRazor_MSGraph.Pages
         {
             var SummarizedTextResult = await CognitiveServiceSummarization.GenerateSummarizedText(selectedUserMessage);
             return SummarizedTextResult;
+        }
+        public async Task<bool> PostEmailToChannel(string TeamsId, string ChannelId, IEnumerable EmailBody)
+        {
+            string summarizedBodyForTeams = "";
+            int i = 1;
+            foreach (var item in EmailBody)
+            {
+                summarizedBodyForTeams = summarizedBodyForTeams + i + ": " + item.ToString();
+                i++;
+            }
+            var ResponsePostedMessage = await _graphTeamsClient.SendMessageToTeamsChannels(TeamsId,ChannelId, summarizedBodyForTeams);
+            return ResponsePostedMessage;
         }
         public IActionResult ShowPartailView()
         {

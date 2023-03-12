@@ -48,5 +48,35 @@ namespace DotNetCoreRazor.Graph
             // Remove this code
             //return await Task.FromResult<IEnumerable<Message>>(null);
         }
+
+        public async Task<bool> SendMessageToTeamsChannels(string TeamsId, string ChannelId, string EmailBody)
+        {
+            bool iSMessageSent = false;
+            try
+            {
+                var requestBody = new ChatMessage
+                {
+                    Body = new ItemBody
+                    {
+                        Content = EmailBody,
+                    },
+                };
+                var postedMessageResponse = await _graphServiceClient.Teams[TeamsId].Channels[ChannelId].Messages
+            .Request().AddAsync(requestBody);
+                iSMessageSent = true;
+                //return postedMessageResponse.ToString();
+                //return null;
+                return iSMessageSent;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error Graph Posting Message to Teams Channels: {ex.Message}");
+                iSMessageSent = false;
+                return iSMessageSent;
+                throw;
+            }
+            // Remove this code
+            //return await Task.FromResult<IEnumerable<Message>>(null);
+        }
     }
 }
