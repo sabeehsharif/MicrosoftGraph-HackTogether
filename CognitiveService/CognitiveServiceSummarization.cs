@@ -14,8 +14,6 @@ namespace DotNetCoreRazor_MSGraph.CognitiveService
     //DotNetCoreRazor_MSGraph.Graph
     public class CognitiveServiceSummarization
 {
-        //private static AzureKeyCredential credentials = new AzureKeyCredential("01e7845c945242bbbd22033142476394");
-        //private static Uri endpoint = new Uri("https://summarizeparagraphs.cognitiveservices.azure.com/ ");
         private static AzureKeyCredential credentials;
         private static Uri endpoint;
         private static List<string> summarizedText = new List<string>();
