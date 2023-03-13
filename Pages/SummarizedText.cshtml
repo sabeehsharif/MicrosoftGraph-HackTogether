@@ -62,6 +62,7 @@
                 new SelectList(Model.channelsList, "Value", "Key")
                 )
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <a class="postToTeams" id="" href="javascript:;">Post to Teams </a>
             </div>
         </div>
     </div>
@@ -93,3 +94,44 @@
        @* </div>
     </div>*@
     <br />
+    <script>
+
+    jQuery(function ($) {
+        $('.postToTeams').click(function (data) {
+            alert("btnclicked inside postToTeams");
+            var teamsId = $("#teamsId").val();
+            var emailId = this.id;
+            var emailBody = $(".summarized-mail").text();
+            var jsonData = { "selectedMessageId": emailId, "TeamsId": teamsId, "EmailBody": emailBody };
+
+            console.log(emailId);
+            $.ajax({
+                type: 'GET',
+                url: "Email/?handler=AsyncPostToTeams",
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("XSRF-TOKEN", $('input:hidden[name="__RequestVerificationToken"]').val());
+                },
+                contentType: 'application/json; charset=utf-8"',
+                data: jsonData,
+                success: function (result) {
+                    console.log(result);
+                    debugger;
+                    //alert("result success");
+                    //$(".modal-body").html(result);
+                    //$("#partialModal").find(".modal-body").html(result);
+                    //$("#partialModal").modal('show');
+                    $("#partialModal").html(result);
+                    $("#partialModal").modal('show');
+                },
+                error: function (error) {
+                    alert("I hope you entered correct Teams ID (Group ID) " + error);
+                    console.log(error);
+                    setTimeout(function () {
+                        $("#overlay").fadeOut(300);
+                    }, 500);
+                }
+            })
+        });
+    });
+
+    </script>

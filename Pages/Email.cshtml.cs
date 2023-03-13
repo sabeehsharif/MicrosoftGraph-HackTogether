@@ -121,7 +121,36 @@ namespace DotNetCoreRazor_MSGraph.Pages
 
             return result;
         }
-        public async Task<IEnumerable> SummarizedEmail(string selectedUserMessage)
+        public async Task<IActionResult> OnGetAsyncPostToTeams(string selectedMessageId, string TeamsId, string EmailBody)
+        {
+            var selectedUserMessage = await _graphEmailClient.GetUserMessageDetails(selectedMessageId);
+            MessageViewModel message = new MessageViewModel();
+            message.Body = null;
+            //message.Body = selectedUserMessage;
+            var summarizedEmailPoints = await SummarizedEmail(selectedUserMessage);
+            message.Body = summarizedEmailPoints;
+
+            var channelsList = await _graphTeamsClient.GetTeamsChannels(TeamsId);
+            message.selectedChannel = channelsList.FirstOrDefault().Id;
+            Dictionary<string, string> teamsChannelsList = new Dictionary<string, string>();
+            foreach (var item in channelsList)
+            {
+                teamsChannelsList.Add(item.DisplayName, item.Id);
+            }
+            message.channelsList = teamsChannelsList;
+
+            var myViewData = new ViewDataDictionary(new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(), new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary()) { { "SearchResultsGridPartialModel", message } };
+            myViewData.Model = message;
+
+            PartialViewResult result = new PartialViewResult()
+            {
+                ViewName = "SummarizedText",
+                ViewData = myViewData,
+            };
+
+            return result;
+        }
+            public async Task<IEnumerable> SummarizedEmail(string selectedUserMessage)
         {
             var SummarizedTextResult = await CognitiveServiceSummarization.GenerateSummarizedText(selectedUserMessage);
             return SummarizedTextResult;
