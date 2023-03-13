@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Graph;
 using Microsoft.Identity.Web;
@@ -24,15 +25,16 @@ namespace DotNetCoreRazor_MSGraph.Pages
     {
         private readonly GraphEmailClient _graphEmailClient;
         private readonly GraphTeamsClient _graphTeamsClient;
-
+        private readonly IConfiguration _configuration;
         [BindProperty(SupportsGet = true)]
         public string NextLink { get; set; }
         public IEnumerable<Message> Messages { get; private set; }
         public List<string> SummarizedTextResult;
-        public EmailModel(GraphEmailClient graphEmailClient, GraphTeamsClient graphTeamsClient)
+        public EmailModel(GraphEmailClient graphEmailClient, GraphTeamsClient graphTeamsClient, IConfiguration configuration)
         {
             _graphEmailClient = graphEmailClient;
             _graphTeamsClient = graphTeamsClient;
+            _configuration = configuration;
         }
 
         public async Task OnGetAsync()
@@ -162,7 +164,9 @@ namespace DotNetCoreRazor_MSGraph.Pages
         }
         public async Task<IEnumerable> SummarizedEmail(string selectedUserMessage)
         {
-            var SummarizedTextResult = await CognitiveServiceSummarization.GenerateSummarizedText(selectedUserMessage);
+            string azureCredentials = _configuration.GetValue<string>("ConfigurationAzure:credentials");
+            string azureCognitiveServiceEndPoint = _configuration.GetValue<string>("ConfigurationAzure:endpoint");
+            var SummarizedTextResult = await CognitiveServiceSummarization.GenerateSummarizedText(selectedUserMessage, azureCredentials, azureCognitiveServiceEndPoint);
             return SummarizedTextResult;
         }
         public async Task<bool> PostEmailToChannel(string TeamsId, string ChannelId, IEnumerable EmailBody)
