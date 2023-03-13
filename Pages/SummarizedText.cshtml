@@ -44,26 +44,33 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
+        @if (Model.Body != null)
+        {
             <div class="modal-body">
-            @*@Model.Body*@
-            @*@int point =0;*@
-            @{
-                int i = 1;
-            }
-            @foreach(string item in Model.Body)
-            {
-                <p class="summarized-mail">@i : @item.ToString();</p>
-                i++;
-            }
+                @*@Model.Body*@
+                @*@int point =0;*@
+                @{
+                    int i = 1;
+                }
+
+                @foreach (string item in Model.Body)
+                {
+                    <p class="summarized-mail">@i : @item.ToString();</p>
+                    i++;
+                }
             </div>
             <div class="modal-footer">
                 @Html.DropDownListFor(
-                m => m.selectedChannel,
-                new SelectList(Model.channelsList, "Value", "Key")
-                )
+            m => m.selectedChannel,
+            new SelectList(Model.channelsList, "Value", "Key"),new { @id="channelGuid", @class="classChannelGuid" }
+            )
+                <a class="postToTeams" id="" href="javascript:;">Post to Teams </a>
+
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            <a class="postToTeams" id="" href="javascript:;">Post to Teams </a>
             </div>
+
+        }
+
         </div>
     </div>
 
@@ -98,13 +105,12 @@
 
     jQuery(function ($) {
         $('.postToTeams').click(function (data) {
-            alert("btnclicked inside postToTeams");
-            var teamsId = $("#teamsId").val();
-            var emailId = this.id;
-            var emailBody = $(".summarized-mail").text();
-            var jsonData = { "selectedMessageId": emailId, "TeamsId": teamsId, "EmailBody": emailBody };
 
-            console.log(emailId);
+            var teamsId = $("#teamsId").val();
+            var channelId = $('#channelGuid').val();
+            var emailBody = $(".summarized-mail").text();
+            var jsonData = { "channelId": channelId, "TeamsId": teamsId, "EmailBody": emailBody };
+            console.log(teamsId);
             $.ajax({
                 type: 'GET',
                 url: "Email/?handler=AsyncPostToTeams",
@@ -120,8 +126,13 @@
                     //$(".modal-body").html(result);
                     //$("#partialModal").find(".modal-body").html(result);
                     //$("#partialModal").modal('show');
-                    $("#partialModal").html(result);
-                    $("#partialModal").modal('show');
+
+                    //$("#partialModal").html(result);
+                    //$("#partialModal").modal('show');
+                    $("#partialModal").fadeOut().removeClass("active");
+                    $('.modal-backdrop').remove();
+                    $(".btn-secondary").click();
+                    alert("Message Has been posted to selected Teams Channel.");
                 },
                 error: function (error) {
                     alert("I hope you entered correct Teams ID (Group ID) " + error);

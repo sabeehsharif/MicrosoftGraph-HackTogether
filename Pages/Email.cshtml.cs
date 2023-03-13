@@ -121,24 +121,34 @@ namespace DotNetCoreRazor_MSGraph.Pages
 
             return result;
         }
-        public async Task<IActionResult> OnGetAsyncPostToTeams(string selectedMessageId, string TeamsId, string EmailBody)
+        public async Task<IActionResult> OnGetAsyncPostToTeams(string channelId, string TeamsId, string EmailBody)
         {
-            var selectedUserMessage = await _graphEmailClient.GetUserMessageDetails(selectedMessageId);
+            var responsePostedMessage = await PostEmailToChannel(TeamsId, channelId, EmailBody);
+
+            //var selectedUserMessage = await _graphEmailClient.GetUserMessageDetails(selectedMessageId);
             MessageViewModel message = new MessageViewModel();
-            message.Body = null;
-            //message.Body = selectedUserMessage;
-            var summarizedEmailPoints = await SummarizedEmail(selectedUserMessage);
-            message.Body = summarizedEmailPoints;
+            //message.Body = null;
+            ////message.Body = selectedUserMessage;
+            //var summarizedEmailPoints = await SummarizedEmail(selectedUserMessage);
+            //message.Body = summarizedEmailPoints;
 
-            var channelsList = await _graphTeamsClient.GetTeamsChannels(TeamsId);
-            message.selectedChannel = channelsList.FirstOrDefault().Id;
-            Dictionary<string, string> teamsChannelsList = new Dictionary<string, string>();
-            foreach (var item in channelsList)
+            //var channelsList = await _graphTeamsClient.GetTeamsChannels(TeamsId);
+            //message.selectedChannel = channelsList.FirstOrDefault().Id;
+            //Dictionary<string, string> teamsChannelsList = new Dictionary<string, string>();
+            //foreach (var item in channelsList)
+            //{
+            //    teamsChannelsList.Add(item.DisplayName, item.Id);
+            //}
+            //message.channelsList = teamsChannelsList;
+
+            if (responsePostedMessage)
             {
-                teamsChannelsList.Add(item.DisplayName, item.Id);
+                message.response = true;
             }
-            message.channelsList = teamsChannelsList;
-
+            else
+            {
+                message.response = false;
+            }
             var myViewData = new ViewDataDictionary(new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(), new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary()) { { "SearchResultsGridPartialModel", message } };
             myViewData.Model = message;
 
@@ -150,21 +160,21 @@ namespace DotNetCoreRazor_MSGraph.Pages
 
             return result;
         }
-            public async Task<IEnumerable> SummarizedEmail(string selectedUserMessage)
+        public async Task<IEnumerable> SummarizedEmail(string selectedUserMessage)
         {
             var SummarizedTextResult = await CognitiveServiceSummarization.GenerateSummarizedText(selectedUserMessage);
             return SummarizedTextResult;
         }
         public async Task<bool> PostEmailToChannel(string TeamsId, string ChannelId, IEnumerable EmailBody)
         {
-            string summarizedBodyForTeams = "";
-            int i = 1;
-            foreach (var item in EmailBody)
-            {
-                summarizedBodyForTeams = summarizedBodyForTeams + i + ": " + item.ToString();
-                i++;
-            }
-            var ResponsePostedMessage = await _graphTeamsClient.SendMessageToTeamsChannels(TeamsId,ChannelId, summarizedBodyForTeams);
+            string summarizedBodyForTeams = EmailBody.ToString();
+            //int i = 1;
+            //foreach (var item in EmailBody)
+            //{
+            //    summarizedBodyForTeams = summarizedBodyForTeams + i + ": " + item.ToString();
+            //    i++;
+            //}
+            var ResponsePostedMessage = await _graphTeamsClient.SendMessageToTeamsChannels(TeamsId, ChannelId, summarizedBodyForTeams);
             return ResponsePostedMessage;
         }
         public IActionResult ShowPartailView()
@@ -200,6 +210,7 @@ namespace DotNetCoreRazor_MSGraph.Pages
         public IEnumerable Body { get; set; }
         public Dictionary<string, string> channelsList = new Dictionary<string, string>();
         public string selectedChannel { get; set; }
+        public bool response { get; set; }
     }
 }
 
