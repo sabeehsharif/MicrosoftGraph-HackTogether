@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using Microsoft.Graph;
 using System.Collections;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Graph.ExternalConnectors;
 
 namespace DotNetCoreRazor_MSGraph.CognitiveService
 {
@@ -12,9 +14,9 @@ namespace DotNetCoreRazor_MSGraph.CognitiveService
     //DotNetCoreRazor_MSGraph.Graph
     public class CognitiveServiceSummarization
 {
-    private static readonly AzureKeyCredential credentials = new AzureKeyCredential("01e7845c945242bbbd22033142476394");
-    private static readonly Uri endpoint = new Uri("https://summarizeparagraphs.cognitiveservices.azure.com/ ");
-        private static readonly List<string> summarizedText = new List<string>();
+        private static AzureKeyCredential credentials;
+        private static Uri endpoint;
+        private static List<string> summarizedText = new List<string>();
     // Example method for summarizing text
     public static async Task TextSummarizationExample(TextAnalyticsClient client, string document)
     {
@@ -52,7 +54,9 @@ namespace DotNetCoreRazor_MSGraph.CognitiveService
         // View operation results.
         await foreach (AnalyzeActionsResult documentsInPage in operation.Value)
         {
-            IReadOnlyCollection<ExtractSummaryActionResult> summaryResults = documentsInPage.ExtractSummaryResults;
+                summarizedText.Clear();
+
+                IReadOnlyCollection<ExtractSummaryActionResult> summaryResults = documentsInPage.ExtractSummaryResults;
 
             foreach (ExtractSummaryActionResult summaryActionResults in summaryResults)
             {
@@ -66,17 +70,16 @@ namespace DotNetCoreRazor_MSGraph.CognitiveService
 
                 foreach (ExtractSummaryResult documentResults in summaryActionResults.DocumentsResults)
                 {
-                    //if (documentResults.HasError)
-                    //{
-                    //    Console.WriteLine($"  Error!");
-                    //    Console.WriteLine($"  Document error code: {documentResults.Error.ErrorCode}.");
-                    //    Console.WriteLine($"  Message: {documentResults.Error.Message}");
-                    //    continue;
-                    //}
+                        //if (documentResults.HasError)
+                        //{
+                        //    Console.WriteLine($"  Error!");
+                        //    Console.WriteLine($"  Document error code: {documentResults.Error.ErrorCode}.");
+                        //    Console.WriteLine($"  Message: {documentResults.Error.Message}");
+                        //    continue;
+                        //}
 
-                    //Console.WriteLine($"  Extracted the following {documentResults.Sentences.Count} sentence(s):");
-                    //Console.WriteLine();
-
+                        //Console.WriteLine($"  Extracted the following {documentResults.Sentences.Count} sentence(s):");
+                        //Console.WriteLine();
                     foreach (SummarySentence sentence in documentResults.Sentences)
                     {
                         summarizedText.Add(sentence.Text);
@@ -88,9 +91,16 @@ namespace DotNetCoreRazor_MSGraph.CognitiveService
         }
 
     }
-        public async static Task<IEnumerable> GenerateSummarizedText(string BodyText)
+        public async static Task<IEnumerable> GenerateSummarizedText(string BodyText, string azureCredentials, string azureCognitiveServiceEndPoint)
         {
+
+            //string keySecretva = keySecret;
+            //string endpointval = endpointtest;
+            //var client = new TextAnalyticsClient(endpoint, credentials);
+            credentials = new AzureKeyCredential(azureCredentials);
+            endpoint = new Uri(azureCognitiveServiceEndPoint);
             var client = new TextAnalyticsClient(endpoint, credentials);
+
             await TextSummarizationExample(client, BodyText);
             return summarizedText;
         }

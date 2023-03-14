@@ -27,12 +27,19 @@ namespace DotNetCoreRazor_MSGraph.Graph
         {
             try
             {
-                var emails = await _graphServiceClient.Me.Messages
+//                List<Option> options = new List<Option>
+//{
+//   //Creating header
+//   new HeaderOption("Prefer","outlook.body-content-type='text'")
+//};
+                //var test = _graphServiceClient.Me.MailFolders.Inbox.Messages;
+                //var emails = await _graphServiceClient.Me.Messages
+                var emails = await _graphServiceClient.Me.MailFolders.Inbox.Messages
             .Request()
             .Select(msg => new
             {
                 msg.Subject,
-                msg.BodyPreview,
+                msg.Body,
                 msg.ReceivedDateTime,
                 msg.Id,
                 msg.InternetMessageId,
@@ -55,15 +62,27 @@ namespace DotNetCoreRazor_MSGraph.Graph
         {
             try
             {
-                var emails = await _graphServiceClient.Me.Messages[id].Request().Select(msg => new
+                //                List options = new List
+                //{
+
+                //new HeaderOption("Prefer", "outlook.body-content-type='text'")
+                //};
+                List<Option> options = new List<Option>
+{
+   //Creating header
+   new HeaderOption("Prefer","outlook.body-content-type='text'")
+};
+                var emails = await _graphServiceClient.Me.Messages[id].Request(options).Select(msg => new
             {
                     msg.Subject,
                 msg.BodyPreview,
                 msg.ReceivedDateTime,
                 msg.Id,
                 msg.InternetMessageId,
-                msg.ConversationId
-            }).GetAsync();
+                msg.ConversationId,
+                msg.Body
+
+                }).GetAsync();
                 //.Request()
                 //.Select(msg => new
                 //{
@@ -77,7 +96,7 @@ namespace DotNetCoreRazor_MSGraph.Graph
                 //.OrderBy("receivedDateTime desc")
                 //.Top(10)
                 //.GetAsync();
-                return emails.BodyPreview;
+                return emails.Body.Content;
             }
             catch (Exception ex)
             {

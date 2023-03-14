@@ -3,9 +3,65 @@
 @{
     ViewData["Title"] = "ASP.NET Core and Microsoft Graph";
 }
-
+<style>
+    .details{
+  display:block;
+  margin:20px auto;
+  padding:10px 30px;
+  background-color:#eee;
+  border:solid #ccc 1px;
+  cursor: pointer;
+}
+#overlay{	
+  position: fixed;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+  height:100%;
+  display: none;
+  background: rgba(0,0,0,0.6);
+}
+.cv-spinner {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;  
+}
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px #ddd solid;
+  border-top: 4px #2e93e6 solid;
+  border-radius: 50%;
+  animation: sp-anime 0.8s infinite linear;
+}
+@@keyframes sp-anime {
+  100% { 
+    transform: rotate(360deg); 
+  }
+}
+.is-hide{
+  display:none;
+}
+</style>
 <div>
+    <p>
+       <span style="text-decoration:blink"></span> How it works?
+        
+    </p>
+    <p>
+        This Project is using Graph api and Azure CognitiveService to summarized the email body to share with stakeholders.<br />
+        1: Here you are getting Your Inbox list.<br />
+        2: Select the Teams from dropdown. (Here you will only see teams you are part of)<br />
+        3: Click on Summarized Text.<br />
+        4: In Pop you will get summarized text of detailed email body.<br />
+        5: Select the teams channel where you want to post this Summarized email body.<br />
+        6: Now check your teams channel to see summarized email body.<br />
+    </p>
     <h1>Email</h1>
+    <label style="color:red" id="lblTeamsId">Select Teams from Dropdown: </label>
+    @*<input type="text" style="width: 45%; border-block-color:red" placeholder="Id of your teams be like f0c093cb-e5c5-4545-8253-de12677105df" id="teamsId" />*@
+    <div id="teamsList"></div>
     @if (User.Identity.IsAuthenticated)
     {
         if (Model.Messages != null && Model.Messages.Any()) {
@@ -17,6 +73,19 @@
                        @* <h5 class="card-title">
                             "ID= "+ @message.Id
                         </h5>*@
+                      @*  <div>
+                            @Html.Partial("_MyPartialView", @message.BodyPreview )
+                            @{
+                                Html.RenderPartial("_MyPartialView", @message.BodyPreview);
+                            }
+                        </div>*@
+                @*        @{
+                            //await Html.RenderPartialAsync("Pages/SummarizedTextResult", model: Model.Messages);
+                            await Html.RenderPartialAsync("Pages/SummarizedTextResult", message.BodyPreview);
+
+                        }*@
+
+
                         <h5 class="card-title">
                             @message.Subject
                             @* Add message subject here *@
@@ -29,12 +98,16 @@
 
                         </h6>
                         <p class="card-text">
-                            @message.BodyPreview
-
+                            @*@message.Body.Content*@
+                            @Html.Raw(@message.Body.Content)
                             @* Add message body preview here *@
 
                         </p>
+                        @*<a class="details" id=@message.Id href="javascript:;">Summarized Text @message.Subject</a>*@
+                        @*<input type="button" class=@message.Id value="Click" id="btnClick" />*@
+                        @*<input type="button" class="details" value="Click" id=@message.Id />*@
                         <a class="details" id=@message.Id href="javascript:;">Summarized Text @message.Subject</a>
+
                     </div>
                 </div>
                 <br />
@@ -48,11 +121,11 @@
         else {
             <div>No Messages found</div>
         }
-        <div id="partialModal" class="modal" tabindex="-1" role="dialog">
+        @*<div id="partialModal" class="modal" tabindex="-1" role="dialog">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Customer Details Form</h5>
+                        <h5 class="modal-title">Summarized Email Body</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -64,6 +137,9 @@
                     </div>
                 </div>
             </div>
+        </div>*@
+        <div id="partialModal" class="modal" tabindex="-1" role="dialog">
+            
         </div>
     }
     else
@@ -75,10 +151,15 @@
     Learn how to build this page by going through the <strong><a href="https://docs.microsoft.com/learn/paths/m365-msgraph-dotnetcore-scenarios/?WT.mc_id=m365-30352-cxa" target="_blank">Explore Microsoft Graph scenarios for ASP.NET Core development</a></strong> learning path on Microsoft Learn.
 
 </div>
+<div id="overlay">
+    <div class="cv-spinner">
+        <span class="spinner"></span>
+    </div>
+</div>
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous" />
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-<script type="text/javascript">
+@*<script type="text/javascript">
     $(function () {
         $(".details").click(function () {
             //var customerId = $(this).closest("tr").find("td").eq(0).html();
@@ -106,4 +187,196 @@
             });
         });
     });
+</script>*@
+<script type="text/javascript">
+    $(document).ready(function () {
+        console.log("ready!");
+        //alert("ready");
+
+            $.ajax({
+                type: 'GET',
+            url: "Email/?handler=AsyncGetTeamsList",
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("XSRF-TOKEN", $('input:hidden[name="__RequestVerificationToken"]').val());
+                },
+                contentType: 'application/json; charset=utf-8"',
+                success: function (result) {
+                    console.log(result);
+                    debugger;
+                    //alert("result success");
+                    //$(".modal-body").html(result);
+                    //$("#partialModal").find(".modal-body").html(result);
+                    //$("#partialModal").modal('show');
+
+                    //$("#partialModal").html(result);
+                    //$("#partialModal").modal('show');
+                    //$("#partialModal").fadeOut().removeClass("active");
+                    //$('.modal-backdrop').remove();
+                    //$(".btn-secondary").click();
+                    //alert("Teams list loaded.");
+                $("#teamsList").html(result);
+                },
+                error: function (error) {
+                    alert("Something went wrong." + error);
+                    console.log(error);
+                    setTimeout(function () {
+                        $("#overlay").fadeOut(300);
+                    }, 500);
+                }
+            })
+    });
+    //var jsonData = { "selectedMessageId": "AAMkADZkMzY5ZWVlLTFkNzEtNGMwYi05NDQ3LWVjNjJkNjIzNmFiNQBGAAAAAACdscMaReZSQ7oF3KPwwSZxBwDwHLYZ0j_qTreja8fBp_umAAAAAAEPAADwHLYZ0j_qTreja8fBp_umAAIasSz0AAA=" };
+
+    //$.ajax({
+    //    type: 'GET',
+    //    url: "Email/?handler=AsyncUpdateSearchResults",
+    //    beforeSend: function (xhr) {
+    //        xhr.setRequestHeader("XSRF-TOKEN", $('input:hidden[name="__RequestVerificationToken"]').val());
+    //    },
+    //    contentType: 'application/json; charset=utf-8"',
+    //    data: jsonData,
+    //    success: function (result) {
+    //        alert("result success");
+    //        $(".modal-body").html(result);
+    //    },
+    //    error: function (error) {
+    //        alert(error);
+    //        console.log(error);
+    //    }
+    //});
+    //$(function () {
+    //    $('.details').click(function (data) {
+    //        alert("btnclicked");
+    //        var teamsId = $("#teamsId").val();
+    //        var emailId = this.id;
+    //        var jsonData = { "selectedMessageId": emailId, "TeamsId": teamsId };
+
+    //        console.log(emailId);
+    //        $.ajax({
+    //            type: 'GET',
+    //            url: "Email/?handler=AsyncGetTeamsChannel",
+    //            beforeSend: function (xhr) {
+    //                xhr.setRequestHeader("XSRF-TOKEN", $('input:hidden[name="__RequestVerificationToken"]').val());
+    //            },
+    //            contentType: 'application/json; charset=utf-8"',
+    //            data: jsonData,
+    //            success: function (result) {
+    //                console.log(result);
+    //                debugger;
+    //                //alert("result success");
+    //                //$(".modal-body").html(result);
+    //                //$("#partialModal").find(".modal-body").html(result);
+    //                //$("#partialModal").modal('show');
+    //                $("#partialModal").html(result);
+    //                $("#partialModal").modal('show');
+    //            },
+    //            error: function (error) {
+    //                alert("I hope you entered correct Teams ID (Group ID) " + error);
+    //                console.log(error);
+    //            }
+    //        }).done(function () {
+    //            setTimeout(function () {
+    //                $("#overlay").fadeOut(300);
+    //            }, 500);
+    //        });
+    //    });
+    //});
+    ///////Modified Function //
+
+    jQuery(function ($) {
+        $(document).ajaxSend(function () {
+            $("#overlay").fadeIn(300);
+        });
+
+        $('.details').click(function (data) {
+            //alert("btnclicked");
+            //var teamsId = $("#teamsId").val();
+            var teamsId = $("#teamsGuid").val();
+
+            var emailId = this.id;
+            var jsonData = { "selectedMessageId": emailId, "TeamsId": teamsId };
+
+            console.log(emailId);
+            $.ajax({
+                type: 'GET',
+                url: "Email/?handler=AsyncGetTeamsChannel",
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("XSRF-TOKEN", $('input:hidden[name="__RequestVerificationToken"]').val());
+                },
+                contentType: 'application/json; charset=utf-8"',
+                data: jsonData,
+                success: function (result) {
+                    console.log(result);
+                    debugger;
+                    //alert("result success");
+                    //$(".modal-body").html(result);
+                    //$("#partialModal").find(".modal-body").html(result);
+                    //$("#partialModal").modal('show');
+                    $("#partialModal").html(result);
+                    $("#partialModal").modal('show');
+                },
+                error: function (error) {
+                    alert("I hope you entered correct Teams ID (Group ID) " + error);
+                    console.log(error);
+                    setTimeout(function () {
+                        $("#overlay").fadeOut(300);
+                    }, 500);
+                }
+            }).done(function () {
+                setTimeout(function () {
+                    $("#overlay").fadeOut(300);
+                }, 500);
+            });
+        });
+    });
+
+ 
+
+//    $(function () {
+//        $('.details').click(function (data) {
+//alert("btnclicked");
+//            var teamsId = $("#teamsId").val();
+//            var emailId = this.id;
+//            var jsonData = { "selectedMessageId": emailId, "TeamsId": teamsId };
+
+//            console.log(emailId);
+//            $.ajax({
+//                type: 'GET',
+//                url: "Email/?handler=AsyncGetTeamsChannel",
+//                beforeSend: function (xhr) {
+//                    xhr.setRequestHeader("XSRF-TOKEN", $('input:hidden[name="__RequestVerificationToken"]').val());
+//                },
+//                contentType: 'application/json; charset=utf-8"',
+//                data: jsonData,
+//                success: function (result) {
+//                    console.log(result);
+//                    debugger;
+//                    //alert("result success");
+//                    //$(".modal-body").html(result);
+//                    //$("#partialModal").find(".modal-body").html(result);
+//                    //$("#partialModal").modal('show');
+//                    $("#partialModal").html(result);
+//                    $("#partialModal").modal('show');
+//                },
+//                error: function (error) {
+//                    alert("I hope you entered correct Teams ID (Group ID) "+error);
+//                    console.log(error);
+//                }
+//            });
+//        });
+//    });
 </script>
+@*<script type="text/javascript">
+    $(function () {
+        $('#btnClick').click(function (data) {
+            alert("btnclicked");
+            $.post("@Url.Action("ShowPartailView", "Email")", function (data) {
+                if (data) {
+                    alert("in data");
+                    console.log(data);
+                    $('.modal-body').append(data);
+                }
+            });
+        });
+    });
+</script>*@

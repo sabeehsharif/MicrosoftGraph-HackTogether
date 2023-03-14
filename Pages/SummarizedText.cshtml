@@ -3,19 +3,85 @@
 *@
 @{
 }
-@model string
+@model MessageViewModel
 @{
     ViewData["Title"] = "ASP.NET Core and Microsoft Graph";
 }
+@*<h1>@Model.BodyPreview</h1>*@
+<style>
+    #partialModal{
+    display:block;
+    }
+</style>
+@*<div id="partialModal" class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Customer Details Form</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                @Model.BodyPreview
+            </div>
+            <div class="modal-footer">
+                @Html.DropDownListFor(
+                m => m.selectedChannel,
+                new SelectList(Model.channelsList, "Value", "Key")
+                )
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>*@
+
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Summarized Email Body</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        @if (Model.Body != null)
+        {
+            <div class="modal-body">
+                @*@Model.Body*@
+                @*@int point =0;*@
+                @{
+                    int i = 1;
+                }
+
+                @foreach (string item in Model.Body)
+                {
+                    <p class="summarized-mail">@i : @item.ToString();</p>
+                    i++;
+                }
+            </div>
+            <div class="modal-footer">
+                @Html.DropDownListFor(
+            m => m.selectedChannel,
+            new SelectList(Model.channelsList, "Value", "Key"),new { @id="channelGuid", @class="classChannelGuid" }
+            )
+                <a class="postToTeams" id="" href="javascript:;">Post to Teams </a>
+
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+
+        }
+
+        </div>
+    </div>
 
 
-    <div class="card" style="width: 50rem;">
-        <div class="card-body">
+@*    <div class="card" style="width: 50rem;">
+        <div class="card-body">*@
             @* <h5 class="card-title">
         "ID= "+ @message.Id
         </h5>*@
-            <h5 class="card-title">
-            model
+@*            <h5 class="card-title">
+            @Model.BodyPreview*@
                 @* Add message subject here *@
 
             </h5>
@@ -32,6 +98,51 @@
 @*
             </p>
             <a class="details" id=@message.Id href="javascript:;">Summarized Text @message.Subject</a>*@
-        </div>
-    </div>
+       @* </div>
+    </div>*@
     <br />
+    <script>
+
+    jQuery(function ($) {
+        $('.postToTeams').click(function (data) {
+
+            var teamsId = $("#teamsId").val();
+            var channelId = $('#channelGuid').val();
+            var emailBody = $(".summarized-mail").text();
+            var jsonData = { "channelId": channelId, "TeamsId": teamsId, "EmailBody": emailBody };
+            console.log(teamsId);
+            $.ajax({
+                type: 'GET',
+                url: "Email/?handler=AsyncPostToTeams",
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("XSRF-TOKEN", $('input:hidden[name="__RequestVerificationToken"]').val());
+                },
+                contentType: 'application/json; charset=utf-8"',
+                data: jsonData,
+                success: function (result) {
+                    console.log(result);
+                    debugger;
+                    //alert("result success");
+                    //$(".modal-body").html(result);
+                    //$("#partialModal").find(".modal-body").html(result);
+                    //$("#partialModal").modal('show');
+
+                    //$("#partialModal").html(result);
+                    //$("#partialModal").modal('show');
+                    $("#partialModal").fadeOut().removeClass("active");
+                    $('.modal-backdrop').remove();
+                    $(".btn-secondary").click();
+                    alert("Message Has been posted to selected Teams Channel.");
+                },
+                error: function (error) {
+                    alert("I hope you entered correct Teams ID (Group ID) " + error);
+                    console.log(error);
+                    setTimeout(function () {
+                        $("#overlay").fadeOut(300);
+                    }, 500);
+                }
+            })
+        });
+    });
+
+    </script>
