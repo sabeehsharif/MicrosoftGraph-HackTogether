@@ -78,5 +78,38 @@ namespace DotNetCoreRazor.Graph
             // Remove this code
             //return await Task.FromResult<IEnumerable<Message>>(null);
         }
+
+        public async Task<IEnumerable<Team>> GetTeamsList() {
+            try
+            {
+                //var test = _graphServiceClient.Me.MailFolders.Inbox.Messages;
+                //var emails = await _graphServiceClient.Me.Messages
+                //    var teams = await _graphServiceClient.Teams
+                //.Request()
+                //.Select(team => new
+                //{
+                //    team.DisplayName,
+                //    team.Id,
+
+                //})
+                //.GetAsync();
+                //    return teams.CurrentPage;
+                var teams = await _graphServiceClient.Me.JoinedTeams
+            .Request()
+            .Select(team => new
+            {
+                team.DisplayName,
+                team.Id,
+
+            })
+            .GetAsync();
+                return teams.CurrentPage;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error calling Graph Teams: {ex.Message}");
+                throw;
+            }
+        }
     }
 }

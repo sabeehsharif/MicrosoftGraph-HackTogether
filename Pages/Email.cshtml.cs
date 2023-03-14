@@ -87,6 +87,33 @@ namespace DotNetCoreRazor_MSGraph.Pages
 
         //    return result;
         //}
+        public async Task<IActionResult> OnGetAsyncGetTeamsList()
+        {
+            TeamsViewModel teamsList = new TeamsViewModel();
+            var ResponseTeamsList = await _graphTeamsClient.GetTeamsList();
+
+            teamsList.selectedTeam = ResponseTeamsList.FirstOrDefault().Id;
+            //var channelsList = await _graphTeamsClient.GetTeamsChannels(TeamsId);
+            //var responsePostedMessage = await PostEmailToChannel(TeamsId , channelsList.FirstOrDefault().Id, summarizedEmailPoints);
+
+            Dictionary<string, string> teamsListDropDown = new Dictionary<string, string>();
+            foreach (var item in ResponseTeamsList)
+            {
+                teamsListDropDown.Add(item.DisplayName, item.Id);
+            }
+            teamsList.teamsList = teamsListDropDown;
+
+            var myViewData = new ViewDataDictionary(new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(), new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary()) { { "SearchResultsGridPartialModel", teamsList } };
+            myViewData.Model = teamsList;
+
+            PartialViewResult result = new PartialViewResult()
+            {
+                ViewName = "TeamsList",
+                ViewData = myViewData,
+            };
+
+            return result;
+        }
         public async Task<IActionResult> OnGetAsyncGetTeamsChannel(string selectedMessageId, string TeamsId)
         {
             var selectedUserMessage = await _graphEmailClient.GetUserMessageDetails(selectedMessageId);
@@ -181,6 +208,18 @@ namespace DotNetCoreRazor_MSGraph.Pages
             var ResponsePostedMessage = await _graphTeamsClient.SendMessageToTeamsChannels(TeamsId, ChannelId, summarizedBodyForTeams);
             return ResponsePostedMessage;
         }
+        public async Task<IEnumerable> GetTeams()
+        {
+            //string summarizedBodyForTeams = EmailBody.ToString();
+            //int i = 1;
+            //foreach (var item in EmailBody)
+            //{
+            //    summarizedBodyForTeams = summarizedBodyForTeams + i + ": " + item.ToString();
+            //    i++;
+            //}
+            var ResponseTeamsList = await _graphTeamsClient.GetTeamsList();
+            return ResponseTeamsList;
+        }
         public IActionResult ShowPartailView()
         {
             MessageViewModel message = new MessageViewModel();
@@ -215,6 +254,12 @@ namespace DotNetCoreRazor_MSGraph.Pages
         public Dictionary<string, string> channelsList = new Dictionary<string, string>();
         public string selectedChannel { get; set; }
         public bool response { get; set; }
+    }
+    class TeamsViewModel
+    {
+        public string selectedTeam { get; set; }
+
+        public Dictionary<string, string> teamsList = new Dictionary<string, string>();
     }
 }
 

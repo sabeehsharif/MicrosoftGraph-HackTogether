@@ -45,9 +45,23 @@
 }
 </style>
 <div>
+    <p>
+       <span style="text-decoration:blink"></span> How it works?
+        
+    </p>
+    <p>
+        This Project is using Graph api and Azure CognitiveService to summarized the email body to share with stakeholders.<br />
+        1: Here you are getting Your Inbox list.<br />
+        2: Select the Teams from dropdown. (Here you will only see teams you are part of)<br />
+        3: Click on Summarized Text.<br />
+        4: In Pop you will get summarized text of detailed email body.<br />
+        5: Select the teams channel where you want to post this Summarized email body.<br />
+        6: Now check your teams channel to see summarized email body.<br />
+    </p>
     <h1>Email</h1>
-    <label style="color:red" id="lblTeamsId">Enter Teams ID</label>
-    <input type="text" style="width: 45%; border-block-color:red" placeholder="Id of your teams be like f0c093cb-e5c5-4545-8253-de12677105df" id="teamsId" />
+    <label style="color:red" id="lblTeamsId">Select Teams from Dropdown: </label>
+    @*<input type="text" style="width: 45%; border-block-color:red" placeholder="Id of your teams be like f0c093cb-e5c5-4545-8253-de12677105df" id="teamsId" />*@
+    <div id="teamsList"></div>
     @if (User.Identity.IsAuthenticated)
     {
         if (Model.Messages != null && Model.Messages.Any()) {
@@ -175,7 +189,42 @@
     });
 </script>*@
 <script type="text/javascript">
+    $(document).ready(function () {
+        console.log("ready!");
+        //alert("ready");
 
+            $.ajax({
+                type: 'GET',
+            url: "Email/?handler=AsyncGetTeamsList",
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("XSRF-TOKEN", $('input:hidden[name="__RequestVerificationToken"]').val());
+                },
+                contentType: 'application/json; charset=utf-8"',
+                success: function (result) {
+                    console.log(result);
+                    debugger;
+                    //alert("result success");
+                    //$(".modal-body").html(result);
+                    //$("#partialModal").find(".modal-body").html(result);
+                    //$("#partialModal").modal('show');
+
+                    //$("#partialModal").html(result);
+                    //$("#partialModal").modal('show');
+                    //$("#partialModal").fadeOut().removeClass("active");
+                    //$('.modal-backdrop').remove();
+                    //$(".btn-secondary").click();
+                    //alert("Teams list loaded.");
+                $("#teamsList").html(result);
+                },
+                error: function (error) {
+                    alert("Something went wrong." + error);
+                    console.log(error);
+                    setTimeout(function () {
+                        $("#overlay").fadeOut(300);
+                    }, 500);
+                }
+            })
+    });
     //var jsonData = { "selectedMessageId": "AAMkADZkMzY5ZWVlLTFkNzEtNGMwYi05NDQ3LWVjNjJkNjIzNmFiNQBGAAAAAACdscMaReZSQ7oF3KPwwSZxBwDwHLYZ0j_qTreja8fBp_umAAAAAAEPAADwHLYZ0j_qTreja8fBp_umAAIasSz0AAA=" };
 
     //$.ajax({
@@ -241,7 +290,9 @@
 
         $('.details').click(function (data) {
             //alert("btnclicked");
-            var teamsId = $("#teamsId").val();
+            //var teamsId = $("#teamsId").val();
+            var teamsId = $("#teamsGuid").val();
+
             var emailId = this.id;
             var jsonData = { "selectedMessageId": emailId, "TeamsId": teamsId };
 
