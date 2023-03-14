@@ -72,6 +72,8 @@ namespace DotNetCoreRazor_MSGraph
             services.AddScoped<GraphCalendarClient>();
             services.AddScoped<GraphFilesClient>();
             services.AddScoped<GraphTeamsClient>();
+            services.AddScoped<GraphSharePointClient>();
+
 
         }
 

@@ -105,8 +105,9 @@
 
     jQuery(function ($) {
         $('.postToTeams').click(function (data) {
-
-            var teamsId = $("#teamsId").val();
+            debugger;
+            alert("postToTeams clicked");
+            var teamsId = $("#teamsGuid").val();
             var channelId = $('#channelGuid').val();
             var emailBody = $(".summarized-mail").text();
             var jsonData = { "channelId": channelId, "TeamsId": teamsId, "EmailBody": emailBody };
