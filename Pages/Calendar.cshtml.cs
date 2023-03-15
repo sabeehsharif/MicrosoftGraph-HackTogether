@@ -42,6 +42,7 @@ namespace DotNetCoreRazor_MSGraph.Pages
 
         public async Task OnGetAsync()
         {
+            
             var result = await GetSharePointListItems();
             //Messages = await _graphEmailClient.GetUserMessages();
             // Remove this code
@@ -52,6 +53,15 @@ namespace DotNetCoreRazor_MSGraph.Pages
             string siteID = _configuration.GetValue<string>("ConfigurationSharePoint:siteid");
             string listId = _configuration.GetValue<string>("ConfigurationSharePoint:listid");
             var listResponse = await _graphSharePointClient.GetSharePointListItems(siteID, listId);
+            Dictionary<string, string> groceryItems = new Dictionary<string, string>();
+            //var resultCurrentPage = listItems.CurrentPage;
+            foreach (var item in listResponse)
+            {
+                foreach (var itemField in item.Fields.AdditionalData)
+                {
+                    groceryItems.Add(itemField.Key + item.Id, itemField.Value.ToString());
+                }
+            }
             return listResponse;
         }
         public string FormatDateTimeTimeZone(DateTimeTimeZone value)
