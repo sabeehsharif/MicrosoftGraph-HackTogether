@@ -9,6 +9,7 @@ using Microsoft.Graph;
 using System.Linq;
 using System.Net;
 using TimeZoneConverter;
+using DotNetCoreRazor.Graph;
 
 namespace DotNetCoreRazor_MSGraph.Graph
 {
@@ -17,11 +18,10 @@ namespace DotNetCoreRazor_MSGraph.Graph
         private readonly ILogger<GraphCalendarClient> _logger = null;
         private readonly GraphServiceClient _graphServiceClient = null;
 
-        public GraphCalendarClient()
+        public GraphCalendarClient(ILogger<GraphCalendarClient> logger, GraphServiceClient graphServiceClient)
         {
-            // Remove this code
-            _ = _logger;
-            _ = _graphServiceClient;
+            _logger = logger;
+            _graphServiceClient = graphServiceClient;
         }
 
         public async Task<IEnumerable<Event>> GetEvents(string userTimeZone)
@@ -29,7 +29,102 @@ namespace DotNetCoreRazor_MSGraph.Graph
             // Remove this code
             return await Task.FromResult<IEnumerable<Event>>(null);
         }
+        public async Task<IEnumerable<Event>> CreateEvent(Dictionary<string, string> groccery)
+        {
+            try
+            {
+                //            foreach (var item in groccery)
+                //            {
+                //                var requestBody = new Event
+                //                {
+                //                    Subject = item.Value,
+                //                    Body = new ItemBody
+                //                    {
+                //                        ContentType = BodyType.Html,
+                //                        Content = "Does next month work for you?",
+                //                    },
+                //                    Start = new DateTimeTimeZone
+                //                    {
+                //                        DateTime = "2023-12-12T12:00:00",
+                //                        TimeZone = "Pacific Standard Time",
+                //                    },
+                //                    End = new DateTimeTimeZone
+                //                    {
+                //                        DateTime = "2019-10-10T14:00:00",
+                //                        TimeZone = "Pacific Standard Time",
+                //                    },
+                //                    Location = new Location
+                //                    {
+                //                        DisplayName = "Zaigham",
+                //                    },
+                //                    Attendees = new List<Attendee>
+                //{
+                //    new Attendee
+                //    {
+                //        EmailAddress = new EmailAddress
+                //        {
+                //            Address = "MuhammdSabeeh@gporg2020.onmicrosoft.com",
+                //            Name = "Muhammad Sabeeh Custom",
+                //        },
+                //        Type = AttendeeType.Required,
+                //    },
+                //},
+                //                    IsOnlineMeeting = true,
+                //                    OnlineMeetingProvider = OnlineMeetingProviderType.TeamsForBusiness,
+                //                };
+                //            }
+                var requestBody = new Event
+                {
+                    Subject = "Let's go for lunch",
+                    Body = new ItemBody
+                    {
+                        ContentType = BodyType.Html,
+                        Content = "Does next month work for you?",
+                    },
+                    Start = new DateTimeTimeZone
+                    {
+                        DateTime = "2023-12-12T12:00:00",
+                        TimeZone = "Pacific Standard Time",
+                    },
+                    End = new DateTimeTimeZone
+                    {
+                        DateTime = "2019-10-10T14:00:00",
+                        TimeZone = "Pacific Standard Time",
+                    },
+                    Location = new Location
+                    {
+                        DisplayName = "Zaigham",
+                    },
+                    Attendees = new List<Attendee>
+    {
+        new Attendee
+        {
+            EmailAddress = new EmailAddress
+            {
+                Address = "MuhammdSabeeh@gporg2020.onmicrosoft.com",
+                Name = "Muhammad Sabeeh Custom",
+            },
+            Type = AttendeeType.Required,
+        },
+    },
+                    IsOnlineMeeting = true,
+                    OnlineMeetingProvider = OnlineMeetingProviderType.TeamsForBusiness,
+                };
 
+                //var result = await _graphServiceClient.Me.Calendars["AQMkADZkMzY5ZWUBLTFkNzEtNGMwYi05NDQANy1lYzYyZDYyMzZhYjUARgAAA52xwxpF5lJDugXco-DBJnEHAPActhnSP6pOt6Nrx8Gn66YAAAIBBgAAAPActhnSP6pOt6Nrx8Gn66YAAAI1VAAAAA=="].Events.Request().AddAsync(requestBody);
+                var result = await _graphServiceClient.Me.Calendar.Events.Request().AddAsync(requestBody);
+
+                return result.Instances;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error calling Calendar List: {ex.Message}");
+                throw;
+            }
+
+            // Remove this code
+            //return await Task.FromResult<IEnumerable<Event>>(null);
+        }
         // Used for timezone settings related to calendar
         public async Task<MailboxSettings> GetUserMailboxSettings()
         {

@@ -62,9 +62,17 @@ namespace DotNetCoreRazor_MSGraph.Pages
                     groceryItems.Add(itemField.Key + item.Id, itemField.Value.ToString());
                 }
             }
+            //var result = CreateEvent(groceryItems);
+
             return listResponse;
         }
-        public string FormatDateTimeTimeZone(DateTimeTimeZone value)
+        public async Task<IEnumerable<Event>> CreateEvent(Dictionary<string, string> groccery)
+        {
+            var eventResponse = await _graphCalendarClient.CreateEvent(groccery);
+
+            return eventResponse;
+        }
+            public string FormatDateTimeTimeZone(DateTimeTimeZone value)
         {
             // Parse the date/time string from Graph into a DateTime
             var graphDatetime = value.DateTime;
