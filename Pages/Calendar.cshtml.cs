@@ -42,6 +42,7 @@ namespace DotNetCoreRazor_MSGraph.Pages
 
         public async Task OnGetAsync()
         {
+            
             var result = await GetSharePointListItems();
             //Messages = await _graphEmailClient.GetUserMessages();
             // Remove this code
@@ -52,9 +53,39 @@ namespace DotNetCoreRazor_MSGraph.Pages
             string siteID = _configuration.GetValue<string>("ConfigurationSharePoint:siteid");
             string listId = _configuration.GetValue<string>("ConfigurationSharePoint:listid");
             var listResponse = await _graphSharePointClient.GetSharePointListItems(siteID, listId);
+            Dictionary<string, string> groceryItems = new Dictionary<string, string>();
+            //var resultCurrentPage = listItems.CurrentPage;
+            //foreach (var item in listResponse)
+            //{
+            //    foreach (var itemField in item.Fields.AdditionalData)
+            //    {
+            //        groceryItems.Add(itemField.Key + item.Id, itemField.Value.ToString());
+            //    }
+            //}
+            List<string> eventsList = new List<string>();
+            foreach (var item in listResponse)
+            {
+                string singleEvent="";
+                foreach (var itemField in item.Fields.AdditionalData)
+                {
+                    if (itemField.Key == "Title")
+                    {
+
+                    }
+                    groceryItems.Add(itemField.Key + item.Id, itemField.Value.ToString());
+                }
+            }
+            var result = CreateEvent(groceryItems);
+
             return listResponse;
         }
-        public string FormatDateTimeTimeZone(DateTimeTimeZone value)
+        public async Task<IEnumerable<Event>> CreateEvent(Dictionary<string, string> groccery)
+        {
+            var eventResponse = await _graphCalendarClient.CreateEvent(groccery);
+
+            return eventResponse;
+        }
+            public string FormatDateTimeTimeZone(DateTimeTimeZone value)
         {
             // Parse the date/time string from Graph into a DateTime
             var graphDatetime = value.DateTime;

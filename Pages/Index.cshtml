@@ -5,8 +5,8 @@
 }
 
 <div>
-    <h1>ASP.NET Core and Microsoft Graph</h1>
-    <br />
+    <h3> Stakeholders summarized Azure Cognitive Service with Graph .net SDK</h3>
+    
     @if (User.Identity.IsAuthenticated)
     {
         <h4>
@@ -15,7 +15,38 @@
                 <img src="data:image/jpeg;base64, @Model.UserPhoto" class="user-photo nav-profile-photo rounded-circle align-self-center mr-2" />
             }
             Welcome @Model.UserDisplayName!</h4>
-            <h3>@Model.UserEmail</h3>
+            <h4>@Model.UserEmail</h4>
+        <br />
+        <img src="https://img.shields.io/badge/Microsoft%20-Hack--Together-orange?style=for-the-badge&amp;logo=microsoft">
+        <p>
+            <br />
+            <b>Real Time Problem:</b><br />
+            As my CTO having responsibility to look after multiple projects and we as developers having multiple meeting internal external. It was challenging for him to listen or understand complete scenarios or read lengthy emails about discussion.<br />
+            <br />
+            <b>Solution:<br /></b>
+            Using Microsoft Graph .net SDK i have created web application using ,net 7.0 for Team leads to see all emails of belongs to his project.<br />
+            <br />
+            1: Using Azure Cognitive Service summarizing email.<br />
+            2: From Email tab emails Team leads can select specific email.<br />
+            3: On dashboard Team lead can select Microsoft specific Teams and specific channels.<br />
+            4: From Same view team leads can post summarized discussion to teams channel.<br />
+            5: SO higher management or CTO can understand what going on rather then reading complete email.<br />
+            <br />
+            <b>Configuration Details for Azure App:<br /></b>
+            <br />
+            <b> Commands:<br /></b>
+            dotnet user-secrets init<br />
+            dotnet user-secrets set "AzureAd:ClientId" " "<br />
+            dotnet user-secrets set "AzureAd:ClientSecret" " "<br />
+            Appsettings.json update following configuration for cognitive service application:<br />
+            <br />
+            "ConfigurationAzure": {<br />
+            "credentials": "",<br />
+            "endpoint": ""<br />
+            }<br />
+            sStill working on it to enhance. Getting other ideas as well.<br />
+        </p>
+        <img src="https://github.com/microsoft/hack-together/raw/main/assets/banner.png" style="width: 80%;">
     }
     else
     {

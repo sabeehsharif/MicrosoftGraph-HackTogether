@@ -13,7 +13,7 @@ using DotNetCoreRazor_MSGraph.Graph;
 namespace DotNetCoreRazor.Graph
 {
     public class GraphSharePointClient
-{
+    {
         private readonly ILogger<GraphSharePointClient> _logger = null;
         private readonly GraphServiceClient _graphServiceClient = null;
 
@@ -28,10 +28,41 @@ namespace DotNetCoreRazor.Graph
             {
                 //var test = _graphServiceClient.Me.MailFolders.Inbox.Messages;
                 //var emails = await _graphServiceClient.Me.Messages
-                var listItems = await _graphServiceClient.Sites[siteId].Lists[listId]
-            .Request()
+                //    var listItems = await _graphServiceClient.Sites[siteId].Lists[listId]
+                //.Request()
+                //.GetAsync();
+                //    return listItems.Items;
+                //var listsTotal = await _graphServiceClient.Sites[siteId].Lists.Request().GetAsync();
+
+            var queryOptions = new List<QueryOption>()
+            {
+                new QueryOption("expand", "fields(select=Title,ExpiryDate)")
+            };
+
+            var listItems = await _graphServiceClient.Sites[siteId].Lists[listId].Items
+            .Request(queryOptions)
             .GetAsync();
-                return listItems.Items;
+                //ListItem listItem = new ListItem();
+                //foreach (var item in listItems.CurrentPage)
+                //{
+                //    listItem.Fields = item.Fields;
+                //}
+                //Dictionary<string, string> world = new Dictionary<string, string>();
+                //var resultCurrentPage = listItems.CurrentPage;
+                //foreach (var item in resultCurrentPage)
+                //{
+                //    foreach (var itemField in item.Fields.AdditionalData)
+                //    {
+
+                //    world.Add(itemField.Key+item.Id, itemField.Value.ToString());
+                //    }
+                //}
+                //for(int i=1; i<=2; i++)
+                //{
+                //    world.Add(resultCurrentPage.FirstOrDefault().Fields.AdditionalData.Keys.FirstOrDefault(), resultCurrentPage.FirstOrDefault().Fields.AdditionalData.Values.FirstOrDefault().ToString());
+                //}
+                return listItems.CurrentPage;
+
             }
             catch (Exception ex)
             {

@@ -119,19 +119,10 @@ namespace DotNetCoreRazor_MSGraph.Pages
             var selectedUserMessage = await _graphEmailClient.GetUserMessageDetails(selectedMessageId);
             MessageViewModel message = new MessageViewModel();
             message.Body = null;
-            //message.Body = selectedUserMessage;
             var summarizedEmailPoints = await SummarizedEmail(selectedUserMessage);
-            //List<string> summarizedEmail = new List<string>();
-            //foreach (var item in summarizedEmailPoints)
-            //{
-            //    summarizedEmail.Add(item.ToString());
-            //}
             message.Body = summarizedEmailPoints;
-
             var channelsList = await _graphTeamsClient.GetTeamsChannels(TeamsId);
             message.selectedChannel = channelsList.FirstOrDefault().Id;
-            //var responsePostedMessage = await PostEmailToChannel(TeamsId , channelsList.FirstOrDefault().Id, summarizedEmailPoints);
-
             Dictionary<string, string> teamsChannelsList = new Dictionary<string, string>();
             foreach (var item in channelsList)
             {
