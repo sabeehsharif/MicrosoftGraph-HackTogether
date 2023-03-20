@@ -8,6 +8,7 @@
     <h1>Calendar Events</h1>
     @if (User.Identity.IsAuthenticated)
     {
+        <form method="post"><input type="submit" id="btnSave" value="Create Events" asp-page-handler="Save" /></form>
         if (Model.Events != null && Model.Events.Any()) {
             @* Add foreach statement here *@
 
@@ -59,3 +60,10 @@
     Learn how to build this page by going through the <strong><a href="https://docs.microsoft.com/learn/paths/m365-msgraph-dotnetcore-scenarios/?WT.mc_id=m365-30352-cxa" target="_blank">Explore Microsoft Graph scenarios for ASP.NET Core development</a></strong> learning path on Microsoft Learn.
 
 </div>
+
+@*@if (ViewData["Message"] != null)
+{<script type="text/javascript">
+        window.onload = function () {
+            alert('@ViewData["Message"]');
+        };</script>
+}*@

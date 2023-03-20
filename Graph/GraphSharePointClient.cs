@@ -9,6 +9,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using DotNetCoreRazor_MSGraph.Graph;
+using DotNetCoreRazor_MSGraph.ResponseModel;
 
 namespace DotNetCoreRazor.Graph
 {
@@ -22,7 +23,7 @@ namespace DotNetCoreRazor.Graph
             _logger = logger;
             _graphServiceClient = graphServiceClient;
         }
-        public async Task<IEnumerable<ListItem>> GetSharePointListItems(string siteId, string listId)
+        public async Task<IEnumerable<ResponseListItems>> GetSharePointListItems(string siteId, string listId)
         {
             try
             {
@@ -42,6 +43,27 @@ namespace DotNetCoreRazor.Graph
             var listItems = await _graphServiceClient.Sites[siteId].Lists[listId].Items
             .Request(queryOptions)
             .GetAsync();
+                var listResponse = listItems.CurrentPage;
+                List<ResponseListItems> lstResponseListItems = new List<ResponseListItems>();
+                foreach (var item in listResponse)
+                {
+                    ResponseListItems responseListItems = new ResponseListItems();
+                    foreach (var itemField in item.Fields.AdditionalData)
+                    {
+                        //groceryItems.Add(itemField.Key + item.Id, itemField.Value.ToString());
+                        if (itemField.Key == "Title")
+                        {
+                            responseListItems.Title = itemField.Value.ToString();
+                        }
+                        else if (itemField.Key == "ExpiryDate")
+                        {
+                            responseListItems.ExpiryDate = itemField.Value.ToString();
+                        }
+                    }
+                    lstResponseListItems.Add(responseListItems);
+                }
+                return lstResponseListItems;
+
                 //ListItem listItem = new ListItem();
                 //foreach (var item in listItems.CurrentPage)
                 //{
@@ -61,7 +83,7 @@ namespace DotNetCoreRazor.Graph
                 //{
                 //    world.Add(resultCurrentPage.FirstOrDefault().Fields.AdditionalData.Keys.FirstOrDefault(), resultCurrentPage.FirstOrDefault().Fields.AdditionalData.Values.FirstOrDefault().ToString());
                 //}
-                return listItems.CurrentPage;
+                //return listItems.CurrentPage;
 
             }
             catch (Exception ex)
