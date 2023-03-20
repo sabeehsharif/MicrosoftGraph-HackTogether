@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using DotNetCoreRazor.Graph;
 using DotNetCoreRazor_MSGraph.CognitiveService;
 using DotNetCoreRazor_MSGraph.Graph;
+using DotNetCoreRazor_MSGraph.ResponseModel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -25,7 +26,7 @@ namespace DotNetCoreRazor_MSGraph.Pages
         private readonly GraphCalendarClient _graphCalendarClient;
         private readonly GraphProfileClient _graphProfileClient;
         private readonly GraphSharePointClient _graphSharePointClient;
-
+        public string Message { get; set; }
         private readonly IConfiguration _configuration;
         private MailboxSettings MailboxSettings { get; set; }
 
@@ -43,10 +44,16 @@ namespace DotNetCoreRazor_MSGraph.Pages
         public async Task OnGetAsync()
         {
             
-            var result = await GetSharePointListItems();
+           // var result = await GetSharePointListItems();
             //Messages = await _graphEmailClient.GetUserMessages();
             // Remove this code
-            //await Task.CompletedTask;
+            await Task.CompletedTask;
+        }
+        public async void OnPostSave()
+        {
+            var result = await GetSharePointListItems();
+            ViewData["Message"] = "You clicked Save!";
+            Message = "clicked";
         }
         public async Task<IEnumerable> GetSharePointListItems()
         {
@@ -62,24 +69,27 @@ namespace DotNetCoreRazor_MSGraph.Pages
             //        groceryItems.Add(itemField.Key + item.Id, itemField.Value.ToString());
             //    }
             //}
-            List<string> eventsList = new List<string>();
+            //List<string> eventsList = new List<string>();
+            //foreach (var item in listResponse)
+            //{
+            //    string singleEvent="";
+            //    foreach (var itemField in item.Fields.AdditionalData)
+            //    {
+            //        if (itemField.Key == "Title")
+            //        {
+
+            //        }
+            //        groceryItems.Add(itemField.Key + item.Id, itemField.Value.ToString());
+            //    }
+            //}
+            //var result = CreateEvent(groceryItems);
             foreach (var item in listResponse)
             {
-                string singleEvent="";
-                foreach (var itemField in item.Fields.AdditionalData)
-                {
-                    if (itemField.Key == "Title")
-                    {
-
-                    }
-                    groceryItems.Add(itemField.Key + item.Id, itemField.Value.ToString());
-                }
+                var result = CreateEvent(item);
             }
-            var result = CreateEvent(groceryItems);
-
             return listResponse;
         }
-        public async Task<IEnumerable<Event>> CreateEvent(Dictionary<string, string> groccery)
+        public async Task<IEnumerable<Event>> CreateEvent(ResponseListItems groccery)
         {
             var eventResponse = await _graphCalendarClient.CreateEvent(groccery);
 
